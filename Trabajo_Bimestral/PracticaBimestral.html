@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulario de Ventas</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f87b;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        #banner {
+            width: 100%;
+            height: 120px;
+            background-image: url("img/Banner.jpg");
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        #banner h1 {
+            font-family: 'Gothic A1', sans-serif;
+            font-size: 2.5em;
+            color: white;
+            margin: 0;
+            text-align: center;
+        }
+
+        #banner img {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            height: 100px;
+            width: auto;
+        }
+
+        .container {
+            width: 80%;
+            max-width: 1000px;
+            margin: auto;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border: 2px solid #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border: 2px solid #333;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+            font-weight: bold;
+        }
+
+        .product-image {
+            width: 50px;
+            height: auto;
+        }
+
+        .totals {
+            display: flex;
+            justify-content: flex-end;
+            padding: 10px 0;
+        }
+
+        .totals div {
+            width: 30%;
+            text-align: right;
+            padding: 5px 20px;
+        }
+
+        .totals div span {
+            font-weight: bold;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007BFF;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="banner">
+        <h1>PRACTICA</h1>
+        <img src="img/incos.png" alt="Logo">
+    </div>
+
+    <div class="container">
+        <h2 style="text-align: center;">Formulario de Ventas</h2>
+
+        <div class="header">
+            <div>
+                <label>Numero de Venta: <input type="text" id="numeroVenta"></label><br>
+                <label>Fecha: <input type="date" id="fecha"></label><br>
+                <label>Cliente: <input type="text" id="cliente"></label><br>
+                <label>Telefono: <input type="tel" id="telefono"></label>
+            </div>
+            <div>
+                <label>Email: <input type="email" id="email"></label><br>
+                <label>Direccion: <input type="text" id="direccion"></label>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Cantidad</th>
+                    <th>Descripcion</th>
+                    <th>Caracteristicas</th>
+                    <th>Imagen</th>
+                    <th>Precio Unitario (Bs)</th>
+                    <th>Total (Bs)</th>
+                </tr>
+            </thead>
+            <tbody id="productTable">
+            </tbody>
+        </table>
+
+        <div class="totals">
+            <div>Sub-total: Bs <span id="subtotal">0.00</span></div>
+            <div>IVA (13%): Bs <span id="iva">0.00</span></div>
+            <div>Total: Bs <span id="total">0.00</span></div>
+        </div>
+
+        <div class="button-container">
+            <button onclick="addProductRow()">Agregar Producto</button>
+        </div>
+    </div>
+
+    <script>
+        const products = [
+            { name: 'Samsung Galaxy S21', price: 0, details: '8GB RAM, 128GB, Exynos 2100, Camara 64MP', image: 'img/galaxy.jpeg' },
+            { name: 'Redmi Note 10 Pro', price: 0, details: '6GB RAM, 128GB, Snapdragon 732G, Camara 108MP', image: 'img/redmi.jpeg' },
+            { name: 'Huawei P40', price: 0, details: '8GB RAM, 128GB, Kirin 990, Camara 50MP', image: 'img/huawei.jpeg' },
+            { name: 'Infinix Zero X', price: 0, details: '8GB RAM, 128GB, MediaTek Helio G95, Camara 48MP', image: 'img/infinix.jpeg' },
+            { name: 'Poco X5', price: 0, details: '6GB RAM, 128GB, Snapdragon 695, Camara 48MP', image: 'img/poco.jpeg' }
+        ];
+
+        function addProductRow() {
+            const table = document.getElementById('productTable');
+            const row = table.insertRow();
+            
+            const cellQty = row.insertCell();
+            const qtyInput = document.createElement('input');
+            qtyInput.type = 'number';
+            qtyInput.value = 1;
+            qtyInput.min = 1;
+            qtyInput.oninput = updateTotals;
+            cellQty.appendChild(qtyInput);
+
+            const cellDesc = row.insertCell();
+            const descSelect = document.createElement('select');
+            descSelect.onchange = function() { updateProductDetails(row.rowIndex - 1, descSelect.value); };
+            products.forEach((product, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = product.name;
+                descSelect.appendChild(option);
+            });
+            cellDesc.appendChild(descSelect);
+
+            const cellDetails = row.insertCell();
+            cellDetails.className = 'product-details';
+            cellDetails.textContent = products[0].details;
+
+            const cellImg = row.insertCell();
+            const img = document.createElement('img');
+            img.className = 'product-image';
+            img.src = products[0].image;
+            cellImg.appendChild(img);
+
+            const cellPrice = row.insertCell();
+            const priceInput = document.createElement('input');
+            priceInput.type = 'number';
+            priceInput.placeholder = '0.00';
+            priceInput.min = 0;
+            priceInput.oninput = updateTotals;
+            cellPrice.appendChild(priceInput);
+
+            const cellTotal = row.insertCell();
+            const totalSpan = document.createElement('span');
+            totalSpan.textContent = '0.00';
+            cellTotal.appendChild(totalSpan);
+
+            updateProductDetails(row.rowIndex - 1, 0);
+            updateTotals();
+        }
+
+        function updateProductDetails(rowIndex, productIndex) {
+            const table = document.getElementById('productTable');
+            const row = table.rows[rowIndex];
+            const product = products[productIndex];
+
+            row.cells[2].textContent = product.details;
+            row.cells[3].firstChild.src = product.image;
+
+            const qty = parseFloat(row.cells[0].firstChild.value);
+            const price = parseFloat(row.cells[4].firstChild.value) || 0;
+            row.cells[5].firstChild.textContent = (qty * price).toFixed(2);
+
+            updateTotals();
+        }
+
+        function updateTotals() {
+            const table = document.getElementById('productTable');
+            let subtotal = 0;
+
+            for (let i = 0; i < table.rows.length; i++) {
+                const row = table.rows[i];
+                const qty = parseFloat(row.cells[0].firstChild.value);
+                const price = parseFloat(row.cells[4].firstChild.value) || 0;
+                const rowTotal = qty * price;
+                subtotal += rowTotal;
+            }
+
+            const iva = subtotal * 0.13;
+            const total = subtotal + iva;
+
+            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('iva').textContent = iva.toFixed(2);
+            document.getElementById('total').textContent = total.toFixed(2);
+        }
+    </script>
+</body>
+</html>
